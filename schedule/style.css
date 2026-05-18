@@ -1,0 +1,71 @@
+:root {
+  overflow: hidden;
+
+  background: transparent;
+
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.schedule-shell {
+  width: 100%;
+  height: 100%;
+
+  padding: 12px;
+
+  border-radius: var(--radius-xl);
+
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+
+  border: 1px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-title {
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
+
+  color: var(--blue);
+
+  margin-bottom: 8px;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 10px;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.12);
+}
+
+.day {
+  font-family: var(--font-heading);
+
+  font-size: 14px;
+
+  color: var(--cream);
+}
+
+.game {
+  font-size: 13px;
+
+  opacity: 0.9;
+}
