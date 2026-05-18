@@ -9,11 +9,14 @@
   <link rel="stylesheet" href="style.css" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
+
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 
 <body>
@@ -27,7 +30,7 @@
 
       <section class="left-zone">
 
-        <div class="top-row">
+        <section class="top-row">
 
           <section class="panel jc-header-panel">
 
@@ -59,7 +62,7 @@
 
           </section>
 
-        </div>
+        </section>
 
       </section>
 
@@ -94,19 +97,7 @@
           <div class="youtube-inner">
 
             <div class="youtube-thumb-wrap">
-
-              <img
-                id="youtubeThumb"
-                alt="Latest YouTube thumbnail"
-              />
-
-              <div
-                class="youtube-fallback"
-                id="youtubeFallback"
-              >
-                Loading latest video...
-              </div>
-
+              <img id="youtubeThumb" alt="Latest YouTube thumbnail" />
             </div>
 
             <div class="youtube-copy">
@@ -115,24 +106,15 @@
                 latest video
               </div>
 
-              <div
-                class="youtube-title"
-                id="youtubeTitle"
-              >
+              <div class="youtube-title" id="youtubeTitle">
                 Loading latest upload...
               </div>
 
-              <div
-                class="youtube-desc"
-                id="youtubeDesc"
-              >
-                Show the YouTube some love 💗
+              <div class="youtube-desc">
+                Catch up before stream starts.
               </div>
 
-              <div
-                class="youtube-link"
-                id="youtubeLinkText"
-              >
+              <div class="youtube-link">
                 !latest
               </div>
 
