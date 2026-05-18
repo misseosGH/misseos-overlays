@@ -1,32 +1,276 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <title>Schedule Widget</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap');
 
-  <title>Schedule</title>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
 
-  <link rel="stylesheet" href="style.css" />
+    * {
+      box-sizing: border-box;
+    }
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+    :root {
+      --card-width: 360px;
+      --card-height: 170px;
+
+      --bg: rgba(20, 20, 30, 0.82);
+      --border: rgba(255, 255, 255, 0.14);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+
+      --label-color: rgba(255, 255, 255, 0.75);
+      --day-color: #ffffff;
+      --game-color: #ffffff;
+      --meta-color: rgba(255, 255, 255, 0.82);
+
+      --accent: #d9b3ff;
+      --accent-2: #ffc8dd;
+
+      --radius: 24px;
+    }
+
+    body {
+      width: var(--card-width);
+      height: var(--card-height);
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 18px 22px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        var(--bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      border-radius: 24px 0 0 24px;
+    }
+
+    .label {
+      position: relative;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 14px;
+      letter-spacing: 1.2px;
+      color: var(--label-color);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .day {
+      position: relative;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 34px;
+      line-height: 1;
+      color: var(--day-color);
+      margin-bottom: 10px;
+    }
+
+    .game {
+      position: relative;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--game-color);
+      margin-bottom: 12px;
+      max-width: 92%;
+      text-wrap: balance;
+    }
+
+    .meta {
+      position: relative;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--meta-color);
+    }
+
+    .dots {
+      position: absolute;
+      right: 18px;
+      bottom: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      transition: transform 220ms ease, background 220ms ease, opacity 220ms ease;
+      opacity: 0.8;
+    }
+
+    .dot.active {
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      transform: scale(1.2);
+      opacity: 1;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+      filter: blur(3px);
+      transition: opacity 250ms ease, transform 250ms ease, filter 250ms ease;
+    }
+
+    .fade-in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+      transition: opacity 250ms ease, transform 250ms ease, filter 250ms ease;
+    }
+
+    .debug {
+      display: none;
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="schedule-shell">
-
-  <div class="schedule-title">
-    THIS WEEK
+  <div class="wrap">
+    <div class="card fade-in" id="card">
+      <div class="label">THIS WEEK ON STREAM</div>
+      <div class="day" id="day">Loading...</div>
+      <div class="game" id="game">Please wait</div>
+      <div class="meta" id="meta">UK Time</div>
+      <div class="dots" id="dots"></div>
+      <pre class="debug" id="debug"></pre>
+    </div>
   </div>
 
-  <div id="scheduleList" class="schedule-list"></div>
+  <script>
+    const dataUrl = "http://127.0.0.1:5000/schedule.json";
+    const rotateMs = 5000;
+    const refreshMs = 30000;
+    const transitionMs = 250;
 
-</div>
+    const cardEl = document.getElementById("card");
+    const dayEl = document.getElementById("day");
+    const gameEl = document.getElementById("game");
+    const metaEl = document.getElementById("meta");
+    const dotsEl = document.getElementById("dots");
+    const debugEl = document.getElementById("debug");
 
-<script src="script.js"></script>
+    let schedule = [];
+    let currentIndex = 0;
+    let rotationInterval = null;
+    let refreshInterval = null;
 
+    function dbg(msg) {
+      debugEl.textContent += "\\n" + msg;
+      console.log(msg);
+    }
+
+    function buildSchedule(data) {
+      return [
+        { day: "Wednesday", game: data.wed || "Add a game", time: "12pm UK" },
+        { day: "Thursday",  game: data.thu || "Add a game", time: "12pm UK" },
+        { day: "Friday",    game: data.fri || "Add a game", time: "12pm UK" },
+        { day: "Saturday",  game: data.sat || "Add a game", time: "12pm UK" },
+        { day: "Sunday",    game: data.sun || "Add a game", time: "9am UK" }
+      ];
+    }
+
+    function renderDots() {
+      dotsEl.innerHTML = "";
+      schedule.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (index === currentIndex ? " active" : "");
+        dotsEl.appendChild(dot);
+      });
+    }
+
+    function renderCard() {
+      if (!schedule.length) return;
+      const item = schedule[currentIndex];
+      dayEl.textContent = item.day;
+      gameEl.textContent = item.game;
+      metaEl.textContent = item.time;
+      renderDots();
+    }
+
+    function animateToNextCard() {
+      if (!schedule.length) return;
+
+      cardEl.classList.remove("fade-in");
+      cardEl.classList.add("fade-out");
+
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % schedule.length;
+        renderCard();
+
+        cardEl.classList.remove("fade-out");
+        cardEl.classList.add("fade-in");
+      }, transitionMs);
+    }
+
+    function startRotation() {
+      if (rotationInterval) clearInterval(rotationInterval);
+
+      rotationInterval = setInterval(() => {
+        animateToNextCard();
+      }, rotateMs);
+    }
+
+    async function fetchSchedule() {
+      try {
+        const response = await fetch(dataUrl + "?t=" + Date.now(), { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+
+        const data = await response.json();
+        const oldDay = schedule[currentIndex]?.day || "Wednesday";
+
+        schedule = buildSchedule(data);
+
+        const foundIndex = schedule.findIndex(item => item.day === oldDay);
+        currentIndex = foundIndex >= 0 ? foundIndex : 0;
+
+        renderCard();
+      } catch (error) {
+        dayEl.textContent = "Error";
+        gameEl.textContent = "Could not load schedule";
+        metaEl.textContent = "";
+        dbg("Fetch failed: " + error.message);
+      }
+    }
+
+    async function init() {
+      await fetchSchedule();
+      startRotation();
+
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(fetchSchedule, refreshMs);
+    }
+
+    init();
+  </script>
 </body>
 </html>
