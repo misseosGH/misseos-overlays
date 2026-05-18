@@ -52,7 +52,7 @@ body {
   width: 100%;
   height: 100%;
 
-  padding: 16px;
+  padding: 16px 16px 50px 16px;
 
   display: flex;
   flex-direction: column;
@@ -228,19 +228,19 @@ body {
 
   gap: var(--main-gap);
 
-  height: 215px;
+  height: 195px;
 
-  flex: 0 0 215px;
+  flex: 0 0 195px;
 
   margin-top: auto;
 }
 
 .first-panel {
-  height: 215px;
+  height: 195px;
 }
 
 .music-panel {
-  height: 215px;
+  height: 195px;
 }
 
 .first-title {
@@ -258,9 +258,9 @@ body {
 /* ---------------- RIGHT COLUMN ---------------- */
 
 .chat-panel {
-  width: 650px;
+  width: 520px;
 
-  height: 100%;
+  height: 490px;
 
   margin-left: auto;
 }
@@ -268,11 +268,13 @@ body {
 .youtube-panel {
   width: 520px;
 
-  height: 215px;
+  height: 195px;
 
-  flex: 0 0 215px;
+  flex: 0 0 195px;
 
   margin-left: auto;
+
+  margin-top: auto;
 }
 
 /* ---------------- TEXT ---------------- */
