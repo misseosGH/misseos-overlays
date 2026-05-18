@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Just Chatting</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+
+<div id="app">
+  <div class="shell">
+
+    <main class="main-grid">
+
+      <!-- LEFT SIDE -->
+
+      <section class="left-zone">
+
+        <div class="top-row">
+
+          <section class="panel jc-header-panel">
+
+            <div class="jc-header-inner">
+
+              <div class="jc-header-kicker">
+                misseos
+              </div>
+
+              <div class="jc-header-title">
+                JUST CHATTING
+              </div>
+
+            </div>
+
+          </section>
+
+          <section class="panel music-panel">
+
+            <div class="section-kicker">
+              now playing
+            </div>
+
+            <h2>
+              Music
+            </h2>
+
+            <div class="music-content" id="musicArea"></div>
+
+          </section>
+
+        </div>
+
+      </section>
+
+      <!-- RIGHT SIDE -->
+
+      <section class="right-zone">
+
+        <section class="panel chat-panel">
+
+          <div class="section-kicker">
+            live chat
+          </div>
+
+          <h2>
+            Chat
+          </h2>
+
+          <div class="chat-shell" id="chatArea"></div>
+
+        </section>
+
+        <section class="panel youtube-panel">
+
+          <div class="section-kicker">
+            latest upload
+          </div>
+
+          <h2>
+            YouTube
+          </h2>
+
+          <div class="youtube-inner">
+
+            <div class="youtube-thumb-wrap">
+
+              <img
+                id="youtubeThumb"
+                alt="Latest YouTube thumbnail"
+              />
+
+              <div
+                class="youtube-fallback"
+                id="youtubeFallback"
+              >
+                Loading latest video...
+              </div>
+
+            </div>
+
+            <div class="youtube-copy">
+
+              <div class="youtube-meta">
+                latest video
+              </div>
+
+              <div
+                class="youtube-title"
+                id="youtubeTitle"
+              >
+                Loading latest upload...
+              </div>
+
+              <div
+                class="youtube-desc"
+                id="youtubeDesc"
+              >
+                Show the YouTube some love 💗
+              </div>
+
+              <div
+                class="youtube-link"
+                id="youtubeLinkText"
+              >
+                !latest
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </main>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
