@@ -1,5 +1,7 @@
 const TWITCH_CHANNEL = "misseos";
-const YOUTUBE_CHANNEL_ID = "UCP_lwTyk1xTPkprlGL_0xGw";
+
+const LATEST_YOUTUBE_URL =
+  "https://decapi.me/youtube/latest_video?id=UCP_lwTyk1xTPkprlGL_0xGw&no_shorts=1";
 
 let hasLoadedYouTube = false;
 
@@ -7,11 +9,12 @@ async function loadGame() {
   try {
     const response = await fetch(
       `https://decapi.me/twitch/game/${TWITCH_CHANNEL}?t=${Date.now()}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store"
+      }
     );
 
     const game = await response.text();
-
     const gameTitle = document.getElementById("gameTitle");
 
     if (gameTitle) {
@@ -23,104 +26,9 @@ async function loadGame() {
   }
 }
 
-async function fetchWithTimeout(url, options = {}, timeout = 8000) {
-  const controller = new AbortController();
-
-  const timeoutId = setTimeout(() => {
-    controller.abort();
-  }, timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-    return response;
-
-  } catch (err) {
-    clearTimeout(timeoutId);
-    throw err;
-  }
-}
-
-async function getLatestFromRss2Json(feedUrl) {
-  const rssToJsonUrl =
-    `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}&t=${Date.now()}`;
-
-  const res = await fetchWithTimeout(rssToJsonUrl, {
-    cache: "no-store"
-  });
-
-  if (!res.ok) {
-    throw new Error(`rss2json failed: ${res.status}`);
-  }
-
-  const data = await res.json();
-
-  console.log("rss2json response:", data);
-
-  if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
-    throw new Error("rss2json returned no items");
-  }
-
-  const item = data.items.find(video => {
-    return video.link && !video.link.includes("/shorts/");
-  });
-
-  if (!item) {
-    throw new Error("rss2json found no usable video");
-  }
-
-  return {
-    title: item.title,
-    thumbnail: item.thumbnail,
-    link: item.link
-  };
-}
-
-async function getLatestFromYouTubeRss(feedUrl) {
-  const proxyUrl =
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}&t=${Date.now()}`;
-
-  const res = await fetchWithTimeout(proxyUrl, {
-    cache: "no-store"
-  });
-
-  if (!res.ok) {
-    throw new Error(`YouTube RSS proxy failed: ${res.status}`);
-  }
-
-  const xmlText = await res.text();
-
-  console.log("YouTube RSS response:", xmlText.slice(0, 500));
-
-  const entryMatches = xmlText.match(/<entry>[\s\S]*?<\/entry>/g);
-
-  if (!entryMatches || entryMatches.length === 0) {
-    throw new Error("No entries found in YouTube RSS");
-  }
-
-  for (const entry of entryMatches) {
-    const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/);
-    const videoIdMatch = entry.match(/<yt:videoId>([\s\S]*?)<\/yt:videoId>/);
-    const linkMatch = entry.match(/href="([^"]+)"/);
-
-    const title = titleMatch ? titleMatch[1].trim() : "";
-    const videoId = videoIdMatch ? videoIdMatch[1].trim() : "";
-    const link = linkMatch ? linkMatch[1].trim() : "";
-
-    if (title && videoId && link && !link.includes("/shorts/")) {
-      return {
-        title: title,
-        thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-        link: link
-      };
-    }
-  }
-
-  throw new Error("No usable video found in YouTube RSS");
+function getYouTubeVideoId(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|v=)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : "";
 }
 
 async function loadLatestYouTube() {
@@ -132,34 +40,49 @@ async function loadLatestYouTube() {
     return;
   }
 
-  const feedUrl =
-    `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
-
   try {
-    let video = null;
+    const response = await fetch(`${LATEST_YOUTUBE_URL}&t=${Date.now()}`, {
+      cache: "no-store"
+    });
 
-    try {
-      video = await getLatestFromRss2Json(feedUrl);
-    } catch (rss2jsonErr) {
-      console.log("rss2json method failed, trying direct RSS method:", rss2jsonErr);
-      video = await getLatestFromYouTubeRss(feedUrl);
+    if (!response.ok) {
+      throw new Error(`DecAPI YouTube failed: ${response.status}`);
     }
 
-    if (!video || !video.title || !video.thumbnail) {
-      throw new Error("Video data missing title or thumbnail");
+    const text = await response.text();
+
+    console.log("DecAPI YouTube response:", text);
+
+    const urlMatch = text.match(/https?:\/\/[^\s]+/);
+    const videoUrl = urlMatch ? urlMatch[0] : "";
+
+    const videoId = getYouTubeVideoId(videoUrl);
+
+    if (!videoUrl || !videoId) {
+      throw new Error("Could not find YouTube URL/video ID in DecAPI response");
     }
 
-    titleEl.textContent = video.title;
+    let title = text.replace(videoUrl, "").trim();
 
-    thumbEl.src = video.thumbnail;
-    thumbEl.alt = video.title;
+    // Clean up common separators DecAPI might return.
+    title = title
+      .replace(/\s+-\s*$/, "")
+      .replace(/\s+\|\s*$/, "")
+      .replace(/\s+—\s*$/, "")
+      .trim();
+
+    titleEl.textContent = title || "Latest upload";
+
+    thumbEl.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg?t=${Date.now()}`;
+    thumbEl.alt = title || "Latest YouTube thumbnail";
     thumbEl.style.display = "block";
 
     hasLoadedYouTube = true;
 
   } catch (err) {
-    console.log("YouTube load failed completely:", err);
+    console.log("YouTube load failed:", err);
 
+    // If it already loaded once, keep the last good video on screen.
     if (hasLoadedYouTube) {
       return;
     }
