@@ -1,4 +1,6 @@
 {
+  "mon": "test monday",
+  "tue": "~sched_tue~",
   "wed": "Pawsome Resort",
   "thu": "Pawsome Resort",
   "fri": "Mold Washe",
