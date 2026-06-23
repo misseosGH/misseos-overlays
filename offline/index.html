@@ -151,8 +151,8 @@
 </div>
 
 <script>
-  const scheduleUrl =
-    "https://misseos-overlays.pages.dev/schedule/schedule.json";
+  const scheduleUrl = "/schedule/schedule.json";
+  const refreshMs = 30000;
 
   const nextStreamTitleEl = document.getElementById("nextStreamTitle");
   const nextStreamMetaEl = document.getElementById("nextStreamMeta");
@@ -168,7 +168,7 @@
   ];
 
   async function loadSchedule() {
-    const response = await fetch(scheduleUrl + "?t=" + Date.now(), {
+    const response = await fetch(`${scheduleUrl}?t=${Date.now()}`, {
       cache: "no-store"
     });
 
@@ -334,6 +334,8 @@
       nextStreamTitleEl.textContent = nextStream.title;
       nextStreamMetaEl.textContent =
         nextStream.day + " at " + nextStream.time;
+
+      console.log("Schedule updated:", new Date().toLocaleTimeString());
     } catch (error) {
       console.log("Next stream failed:", error);
       nextStreamTitleEl.textContent = "Schedule TBC";
@@ -342,6 +344,7 @@
   }
 
   updateNextStream();
+  setInterval(updateNextStream, refreshMs);
 </script>
 
 </body>
