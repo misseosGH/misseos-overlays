@@ -1,9 +1,7 @@
 {
-  "mon": "off|off",
-  "tue": "off|off",
-  "wed": "Pawsome Resort|12pm",
-  "thu": "Pawsome Resort",
-  "fri": "Mold Washe",
-  "sat": "Variety",
-  "sun": "Steam Next Fest"
+  "wed": "Wednesday Test|12pm",
+  "thu": "Thursday Test|1pm",
+  "fri": "Friday Test|3pm",
+  "sat": "Saturday Test|6pm",
+  "sun": "Sunday Test|9am"
 }
