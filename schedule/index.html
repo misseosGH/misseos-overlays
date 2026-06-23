@@ -185,17 +185,43 @@
     let refreshInterval = null;
 
     function dbg(msg) {
-      debugEl.textContent += "\\n" + msg;
+      debugEl.textContent += "\n" + msg;
       console.log(msg);
+    }
+
+    function parseScheduleEntry(value) {
+      const raw = (value || "").trim();
+
+      if (!raw) {
+        return {
+          game: "Add a game",
+          time: "TBC"
+        };
+      }
+
+      const parts = raw.split("|");
+      const game = (parts[0] || "Add a game").trim();
+      let time = (parts[1] || "12pm").trim();
+
+      if (time.toLowerCase() !== "off" && !time.toLowerCase().includes("uk")) {
+        time = time + " UK";
+      }
+
+      return {
+        game,
+        time
+      };
     }
 
     function buildSchedule(data) {
       return [
-        { day: "Wednesday", game: data.wed || "Add a game", time: "12pm UK" },
-        { day: "Thursday",  game: data.thu || "Add a game", time: "12pm UK" },
-        { day: "Friday",    game: data.fri || "Add a game", time: "12pm UK" },
-        { day: "Saturday",  game: data.sat || "Add a game", time: "12pm UK" },
-        { day: "Sunday",    game: data.sun || "Add a game", time: "12pm UK" }
+        { day: "Monday",    ...parseScheduleEntry(data.mon) },
+        { day: "Tuesday",   ...parseScheduleEntry(data.tue) },
+        { day: "Wednesday", ...parseScheduleEntry(data.wed) },
+        { day: "Thursday",  ...parseScheduleEntry(data.thu) },
+        { day: "Friday",    ...parseScheduleEntry(data.fri) },
+        { day: "Saturday",  ...parseScheduleEntry(data.sat) },
+        { day: "Sunday",    ...parseScheduleEntry(data.sun) }
       ];
     }
 
@@ -246,7 +272,7 @@
         if (!response.ok) throw new Error("HTTP " + response.status);
 
         const data = await response.json();
-        const oldDay = schedule[currentIndex]?.day || "Wednesday";
+        const oldDay = schedule[currentIndex]?.day || "Monday";
 
         schedule = buildSchedule(data);
 
