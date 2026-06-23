@@ -50,7 +50,7 @@
 
     <section class="grid">
 
-      <!-- Schedule -->
+      <!-- Next Stream -->
 
       <div class="panel box">
 
@@ -59,15 +59,15 @@
         </div>
 
         <div class="box-kicker">
-          when to find me
+          next stream
         </div>
 
-        <h2>
-          Live Schedule
+        <h2 id="nextStreamTitle">
+          Checking schedule...
         </h2>
 
-        <p>
-          Weds – Sun 12pm (UK Time)
+        <p id="nextStreamMeta">
+          Loading next stream
         </p>
 
       </div>
@@ -151,6 +151,208 @@
   </div>
 
 </div>
+
+<script>
+  const scheduleUrls = [
+    "../schedule/schedule.json",
+    "./schedule/schedule.json",
+    "/schedule/schedule.json"
+  ];
+
+  const nextStreamTitleEl = document.getElementById("nextStreamTitle");
+  const nextStreamMetaEl = document.getElementById("nextStreamMeta");
+
+  const days = [
+    { key: "sun", name: "Sunday" },
+    { key: "mon", name: "Monday" },
+    { key: "tue", name: "Tuesday" },
+    { key: "wed", name: "Wednesday" },
+    { key: "thu", name: "Thursday" },
+    { key: "fri", name: "Friday" },
+    { key: "sat", name: "Saturday" }
+  ];
+
+  async function loadSchedule() {
+    for (const url of scheduleUrls) {
+      try {
+        const response = await fetch(url + "?t=" + Date.now(), {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          continue;
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.log("Schedule fetch failed for:", url, error);
+      }
+    }
+
+    throw new Error("Could not load schedule.json");
+  }
+
+  function getUkNow() {
+    return new Date(
+      new Date().toLocaleString("en-US", {
+        timeZone: "Europe/London"
+      })
+    );
+  }
+
+  function parseScheduleEntry(value) {
+    const raw = (value || "").trim();
+
+    if (!raw) {
+      return {
+        title: "",
+        time: ""
+      };
+    }
+
+    const parts = raw.split("|");
+
+    return {
+      title: (parts[0] || "").trim(),
+      time: (parts[1] || "12pm").trim()
+    };
+  }
+
+  function isOff(entry) {
+    if (!entry) {
+      return true;
+    }
+
+    const title = entry.title.toLowerCase();
+    const time = entry.time.toLowerCase();
+
+    return (
+      !title ||
+      title === "off" ||
+      title === "no stream" ||
+      title === "rest day" ||
+      time === "off"
+    );
+  }
+
+  function formatTime(time) {
+    const cleanTime = (time || "").trim();
+
+    if (!cleanTime) {
+      return "TBC";
+    }
+
+    if (cleanTime.toLowerCase() === "tbc") {
+      return "TBC";
+    }
+
+    if (cleanTime.toLowerCase().includes("uk")) {
+      return cleanTime;
+    }
+
+    return cleanTime + " UK";
+  }
+
+  function parseTimeToMinutes(time) {
+    const clean = (time || "")
+      .toLowerCase()
+      .replace("uk", "")
+      .replace(/\s/g, "")
+      .trim();
+
+    if (!clean || clean === "tbc" || clean === "off") {
+      return null;
+    }
+
+    const twelveHourMatch = clean.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)$/);
+
+    if (twelveHourMatch) {
+      let hours = parseInt(twelveHourMatch[1], 10);
+      const minutes = twelveHourMatch[2]
+        ? parseInt(twelveHourMatch[2], 10)
+        : 0;
+      const period = twelveHourMatch[3];
+
+      if (period === "pm" && hours !== 12) {
+        hours += 12;
+      }
+
+      if (period === "am" && hours === 12) {
+        hours = 0;
+      }
+
+      return hours * 60 + minutes;
+    }
+
+    const twentyFourHourMatch = clean.match(/^(\d{1,2})(?::(\d{2}))$/);
+
+    if (twentyFourHourMatch) {
+      const hours = parseInt(twentyFourHourMatch[1], 10);
+      const minutes = twentyFourHourMatch[2]
+        ? parseInt(twentyFourHourMatch[2], 10)
+        : 0;
+
+      return hours * 60 + minutes;
+    }
+
+    return null;
+  }
+
+  function getNextStream(schedule) {
+    const ukNow = getUkNow();
+    const todayIndex = ukNow.getDay();
+    const nowMinutes = ukNow.getHours() * 60 + ukNow.getMinutes();
+
+    for (let offset = 0; offset < 7; offset++) {
+      const dayIndex = (todayIndex + offset) % 7;
+      const day = days[dayIndex];
+      const entry = parseScheduleEntry(schedule[day.key]);
+
+      if (isOff(entry)) {
+        continue;
+      }
+
+      if (offset === 0) {
+        const streamMinutes = parseTimeToMinutes(entry.time);
+
+        if (streamMinutes !== null && streamMinutes <= nowMinutes) {
+          continue;
+        }
+      }
+
+      return {
+        day: day.name,
+        title: entry.title,
+        time: formatTime(entry.time)
+      };
+    }
+
+    return null;
+  }
+
+  async function updateNextStream() {
+    try {
+      const schedule = await loadSchedule();
+      const nextStream = getNextStream(schedule);
+
+      if (!nextStream) {
+        nextStreamTitleEl.textContent = "Schedule TBC";
+        nextStreamMetaEl.textContent = "Check back soon for updates";
+        return;
+      }
+
+      nextStreamTitleEl.textContent = nextStream.title;
+      nextStreamMetaEl.textContent =
+        nextStream.day + " at " + nextStream.time;
+    } catch (error) {
+      console.log("Next stream failed:", error);
+      nextStreamTitleEl.textContent = "Schedule TBC";
+      nextStreamMetaEl.textContent = "Check back soon for updates";
+    }
+  }
+
+  updateNextStream();
+</script>
 
 </body>
 </html>
