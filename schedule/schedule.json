@@ -1,9 +1,9 @@
 {
-  "mon": "Off|Off",
-  "tue": "Off|Off",
-  "wed": "Moonlight Peaks",
-  "thu": "Moonlight Peaks",
-  "fri": "Cat Mail Co.",
-  "sat": "Stream|12pm",
-  "sun": "Stream|12pm"
+  "mon": "OFF|OFF",
+  "tue": "OFF|OFF",
+  "wed": "Moonlight Peaks|12pm",
+  "thu": "Moonlight Peaks|12pm",
+  "fri": "Cat Mail Co./Palworld|12pm",
+  "sat": "Palworld|12pm",
+  "sun": "Hunt: Showdown|9am"
 }
