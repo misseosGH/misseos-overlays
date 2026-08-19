@@ -1,9 +1,9 @@
 {
   "mon": "OFF|OFF",
   "tue": "OFF|OFF",
-  "wed": "Stream|12pm",
-  "thu": "Stream|12pm",
-  "fri": "Hunt: Showdown w/ Lulu & Nathan|12pm",
-  "sat": "Stream|12pm",
-  "sun": "Stream|12pm"
+  "wed": "Car Wash Sim|12",
+  "thu": "OFF|OFF",
+  "fri": "Fields of Mistria|12",
+  "sat": "Fields of Mistria|12",
+  "sun": "Hunt: Showdown w/ Rex & Ashton|9am"
 }
