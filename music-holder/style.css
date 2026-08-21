@@ -1,0 +1,54 @@
+:root {
+  --panel: rgba(92, 43, 61, 0.58);
+  --panel2: rgba(120, 58, 80, 0.66);
+  --border: rgba(255, 225, 238, 0.22);
+  --muted: #f4dde9;
+  --blue: #a8e2ff;
+  --cream: #fff4f8;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  --radius-xl: 20px;
+  --font-body: "Quicksand", sans-serif;
+  --font-heading: "Fredoka", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 330px;
+  height: 195px;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  font-family: var(--font-body);
+  color: var(--muted);
+}
+
+.music-holder {
+  width: 330px;
+  height: 195px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px;
+}
+
+.section-kicker {
+  margin-bottom: 4px;
+  color: var(--blue);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 4px 0 12px;
+  color: var(--cream);
+  font-family: var(--font-heading);
+}
