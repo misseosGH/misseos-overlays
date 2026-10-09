@@ -1,5 +1,5 @@
 const LATEST_YOUTUBE_URL =
-  "https://decapi.me/youtube/latest_video?id=UCP_lwTyk1xTPkprlGL_0xGw&no_shorts=1";
+  "https://decapi.me/youtube/latest_video?id=UCP_lwTyk1xTPkprlGL_0xGw&min_duration=181";
 
 let hasLoadedYouTube = false;
 
